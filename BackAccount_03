@@ -1,0 +1,213 @@
+// Assignment.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include <string>
+#include <fstream>
+using namespace std;
+
+struct BankAccount {
+	int accountNumber;
+	string customerName;
+	double balance;
+	string password;
+	double interest;
+	double openingBalance;
+};
+void validateAccRange(int, int);
+
+BankAccount client[2];
+void forecastBalance(BankAccount, double, double, int, double, int);
+double validateDouble(string, string, double, double);
+BankAccount acc;
+int accNum;
+int main()
+{
+	string clientName;
+	int i = 0;
+	while (i < 2) {
+		//----------------------------------------Check Account Number----------------------------------------
+		do {
+			cout << "Enter account Number : ";
+			cin >> accNum;
+			if (accNum >= 1000 && accNum <= 9999) {
+				client[i].accountNumber = accNum;
+			}
+			else {
+				cout << "Invalid Input" << endl;
+			}
+		} while (accNum < 1000 || accNum>9999);
+
+		cout << "Enter customer name : ";
+		cin >> client[i].customerName;
+		cout << "Enter account balance : ";
+		cin >> client[i].balance;
+		cout << "Enter password : ";
+		cin >> client[i].password;
+		cout << endl;
+		i++;
+	}
+	char user_wish;
+	int accNum1;
+	int accNum2;
+
+	cout << "Would you like to Transfer money ? ";
+	cin.ignore();
+	cin >> user_wish;
+	switch (user_wish) {
+	case 'Y'://-----------------------------------------------Transfering Money-----------------------------------
+	case 'y':
+		do {
+			cout << "Enter your Account Number : ";
+			cin.ignore();
+			cin >> accNum1;
+			cout << "Enter the Account Number to be Transfered : ";
+			cin.ignore();
+			cin >> accNum2;
+			if (accNum1 >= 1000 && accNum1 <= 9999 && accNum2 >= 1000 && accNum2 <= 9999) {
+				client[i - 2].accountNumber = accNum1;
+				client[i - 1].accountNumber = accNum2;
+			}
+			else {
+				cout << "Invalid Input" << endl;
+			}
+		} while (accNum1 < 1000 || accNum1 >9999);
+
+		validateAccRange(accNum1, accNum2);
+		break;
+	case 'N':
+	case 'n':
+		break;
+	default:
+		cout << "Invalid Input" << endl;
+	}
+	//-----------------------forecasting balance-----------------------------------
+	cout << "Would you like to forecast your balance ? (y/n) ";
+	cin.ignore();
+	cin >> user_wish;
+	switch (user_wish) {
+	case 'y':
+	case 'Y':
+		int months, clientNumber;
+		double withdraw, deposit, interest;
+		cout << "Enter withdrawal amount : ";
+		cin >> withdraw;
+		cout << "Enter deposit amount : ";
+		cin >> deposit;
+		client[i].interest = validateDouble("Enter interest rate : ", "Invalid input", 15, 0);
+		cout << "Number of months : ";
+		cin >> months;
+		cout << "Enter client number : ";
+		cin >> clientNumber;
+		forecastBalance(acc, deposit, withdraw, months, client[i].interest, clientNumber);
+		break;
+	case 'N':
+	case 'n':
+		break;
+	default:
+		cout << "Invalid Input" << endl;
+	}
+	//-----------------------checking the balance----------------------------------
+	cout << "Would You like to check your account balance ? (y/n) ";
+	cin.ignore();
+	cin >> user_wish;
+	switch (user_wish) {
+	case 'Y':
+	case 'y':
+		cout << "Enter your Account Number : ";
+		cin >> accNum;
+		cout << "Enter your Name : ";
+		cin >> clientName;
+		for (int i = 0; i<2; i++) {
+			if (accNum == client[i].accountNumber && clientName == client[i].customerName) {
+				cout << "Your account Balance is " << client[i].balance << endl;
+				cout << " Next customer please" << endl;
+			}
+			else {
+				cout << "Invalid Username or Password " << endl;
+			}
+			break;
+		}
+	case 'N':
+	case 'n':
+		cout << "Thank You" << endl;
+		break;
+	default:
+		cout << "Invalid Input" << endl;
+	}
+
+	system("pause");
+	return 0;
+}
+//Money Transaction............
+void validateAccRange(int accNum1, int accNum2) {
+	double amount;
+	int i = 2;
+	if (accNum1 != accNum2) {
+		cout << "Enter the Amount You want to transfer : ";
+		cin >> amount;
+		if (client[i - 2].balance - amount < 0) {
+			cout << "The remaining balance is in negative!" << endl;
+			system("pause");
+			return;
+		}if ((client[i - 2].balance - amount < 10)) {
+			cout << "Warning - Your remaining balance will be less than $10.00" << endl;
+		}if (client[i - 1].balance + amount >= 100000.00) {
+			cout << "Warning -The transfer amount is the highest amount that is federally insured" << endl;
+		}
+		client[i - 2].balance = client[i - 2].balance - amount;
+		client[i - 1].balance = client[i - 1].balance + amount;
+
+		cout << "First Account balance- " << client[i - 2].balance << endl;
+		cout << "Second Account balance- " << client[i - 1].balance << endl;
+	}
+	else {
+		cout << "Invalid Username or Password " << endl;
+		system("pause");
+		return;
+	}
+}
+
+double validateDouble(string message, string error, double upper, double lower)  //validate intrest rate and account balance
+{
+	double value;
+	do {
+		cout << message;
+		cin >> value;
+
+		if (value < lower || value > upper) {
+			cout << error << endl;
+		}
+	} while (value < lower || value > upper);
+
+	return value;
+}
+//------------------------------------------forecast balance---------------------------------------------------
+void forecastBalance(BankAccount, double automaticDeposit, double automaticWithdraw, int months, double interest, int i)
+{
+	ofstream myfile;
+	cout << "Enter account number : ";
+	cin >> acc.accountNumber;
+	if (acc.accountNumber == client[i].accountNumber) {
+		myfile.open("forecastBalance.txt");
+		double endBalance;
+		double monthly_mult;
+		cout << "Enter opening balance : ";
+		cin >> client[i].openingBalance;
+		myfile << "|noOfYear|" << " \t" << "|Months|" << " \t" << "|Starting balance|" << " \t" << "      | End balance |" << endl;
+		for (int month = 1; month <= months; month++) {
+			monthly_mult = 1.00 + client[i].interest / 100 / 12;
+			client[i].openingBalance *= monthly_mult;
+			endBalance = client[i].openingBalance;
+			endBalance += automaticDeposit;
+			endBalance -= automaticWithdraw;
+			myfile << "      " << (month / 12) << " \t \t   " << (((month % 12) == 0) ? 12 : month) << " \t \t        " << client[i].openingBalance << " \t\t" << endBalance << "\n" << endl;
+			client[i].openingBalance = endBalance;
+		}
+	}
+	else {
+		cout << "invalid input";
+	}
+	myfile.close();
+}
