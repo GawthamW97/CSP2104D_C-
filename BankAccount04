@@ -1,0 +1,142 @@
+// Assignment.cpp : Defines the entry point for the console application.
+//
+
+#include "stdafx.h"
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <vector>
+
+using namespace std;
+
+struct BankAccount {
+	int accountNumber;
+	string customerName;
+	double balance;
+	string password;
+	double interest;
+};
+using namespace std;
+
+BankAccount enterAccountData();
+void computeInterest(BankAccount);
+void displayAccount(BankAccount);
+void dataPersistency(BankAccount);
+
+BankAccount client;
+vector<BankAccount> clientInfo;
+
+int main()
+{
+	do {
+		client = enterAccountData();
+		clientInfo.push_back(client);
+	} while (client.accountNumber != 0);
+
+	for (int i = 0; i < clientInfo.size(); i++) {
+		displayAccount(clientInfo[i]);
+		computeInterest(clientInfo[i]);
+		dataPersistency(clientInfo[i]);
+	}
+
+	system("pause");
+	return 0;
+}
+
+BankAccount enterAccountData()
+{//----------------------------------------Check Account Number----------------------------------------
+	BankAccount client;
+	int accNum;
+	do {
+		cout << "Enter account Number : ";
+		cin >> accNum;
+		if (accNum == 0) {
+			client.accountNumber = accNum;
+			return client;
+		}
+
+		if (accNum >= 1000 && accNum <= 9999) {
+			client.accountNumber = accNum;
+		}
+		else {
+			cout << "Invalid Input" << endl;
+		}
+	} while (accNum < 1000 || accNum>9999);
+	double interest;
+	cout << "Enter customer name : ";
+	cin.ignore();
+	cin >> client.customerName;
+	cout << "Enter password : ";
+	cin.ignore();
+	cin >> client.password;
+	cout << "Enter account balance : ";
+	cin.ignore();
+	cin >> client.balance;
+	do {
+		cout << "Enter Interest rate : ";
+		cin >> interest;
+		if (interest > 0 && interest < 15) {
+			client.interest = interest;
+			break;
+		}
+		else {
+			cout << "Invalid input, try again ." << endl;
+		}
+	} while (true);
+	cout << endl;
+
+	return client;
+}
+//--------------------------------------Compute interest for given years---------------------------------
+void computeInterest(BankAccount obj)
+{
+	if (obj.accountNumber != 0) {
+		double startBalance = obj.balance;
+		int year;
+		cout << "Enter the number of years the account will earn interest : ";
+		cin >> year;
+
+		cout << "Year \t Interest \t Starting balance \t End Balance" << endl;
+
+		for (int i = 1; i <= year; i++)
+		{
+			double interest = startBalance * obj.interest / 100;
+			double endBalance = startBalance + interest;
+
+			cout << "  " << i << " \t | \t " << obj.interest << "\t | \t" << startBalance << "\t | \t" << endBalance << endl;
+			startBalance = endBalance;
+		}
+	}
+}
+
+
+//-----------------------------------Display Account info------------------------------
+void displayAccount(BankAccount obj) {
+	if (obj.accountNumber != 0) {
+		cout << "Account details" << endl;
+		cout << "--------------------------------------------------" << endl;
+		cout << "Account Number : " << obj.accountNumber << endl;
+		cout << "Customer Name : " << obj.customerName << endl;
+		cout << "Password : " << obj.password << endl;
+		cout << "Account balance : " << obj.balance << endl;
+		cout << "Interest Rate : " << obj.interest << "%" << endl;
+		cout << endl;
+	}
+}
+
+//-----------------------------------write info into a file---------------------------------
+void dataPersistency(BankAccount obj) {
+	ofstream myfile;
+	myfile.open("ClientDetails.txt", ios::in | ios::out | ios::app);
+
+	if (obj.accountNumber != 0) {
+		myfile << "------------------------------Account Details------------------------------" << endl;
+		myfile << "Account Number : " << obj.accountNumber << endl;
+		myfile << "Customer Name : " << obj.customerName << endl;
+		myfile << "Password : " << obj.password << endl;
+		myfile << "Account balance : " << obj.balance << endl;
+		myfile << "Interest Rate : " << obj.interest << endl;
+	}
+	myfile.close();
+}
+
