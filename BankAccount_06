@@ -1,0 +1,126 @@
+#include "stdafx.h"
+#include "BankAccount.h"
+#include "Transaction.h"
+#include <stdexcept>
+#include <iostream>
+#include <string>
+
+
+using namespace std;
+const int SIZE = 10;
+char userwish;
+int year;
+int first, second;
+int accountNum1, accountNum2;
+double amount;
+int checkAccountNumber();
+
+ostream& operator<<(ostream& out, Transaction trans) {
+	out << "Account Number of the account the amount transfered from : "<<trans.getFromAccount().getAccountNumber() << " Balance : $"<<trans.getFromAccount().getAccountBalance() <<endl;
+	out << "Account Number of the account the amount will be transfered to : " << trans.getToAccount().getAccountNumber() <<" Balance : $"<<trans.getToAccount().getAccountBalance() << endl;
+	out << "Amount transfered : $" << trans.getAmount() << "\n"<<endl;
+	return out;
+}
+
+int main()
+{
+	BankAccount obj[SIZE];
+	int count = 0;
+	for (int i = 0; i < SIZE; i++) {
+		count++;
+		obj[i].enterAccountData();
+		cout << "Do you wish to continue ?('Y'/'N') " << endl;
+		cin.ignore();
+		cin >> userwish;
+		if (userwish == 'n' || userwish == 'N') {
+			break;
+		}
+	}
+	for (int i = 0; i<count; i++) {
+		obj[i].displayAccount();
+		do {
+			cout << "Enter number of terms : ";
+			cin >> year;
+			cout << "\n" << endl;
+		} while (year < 1 || year > 40);
+		obj[i].computeInterest(year);
+	}
+	//--------------------------------------------------Begin Transaction-----------------------------------------------
+	cout << "**********************Begin Transaction*************************\n" << endl;
+	cout << "Do you wish for a Transaction ? ('Y'/'N')" << endl;
+	cin >> userwish;
+	if (userwish == 'n' || userwish == 'N') {
+		cout << "Thank You " << endl;
+		return 0;
+	}
+	else if (userwish == 'y' || userwish == 'Y') {
+		while (true) {
+			cout << "Enter your Account Number : ";
+			cin.ignore();
+			try {
+				accountNum1 = checkAccountNumber();
+				break;
+			}
+			catch (invalid_argument e) {
+				cout << "The account Number must be in range of 1000 to 9999. Enter again." << endl;
+				cout << e.what() << endl;
+			}
+		}
+		while(true){
+				cout << "Enter the Account Number to be Transfered : ";
+				cin.ignore();
+				try {
+					accountNum2 = checkAccountNumber();
+					break;
+				}catch (invalid_argument e) {
+					cout << "The account Number must be in range of 1000 to 9999. Enter again." << endl;
+					cout << e.what() << endl;
+				}
+			}
+			cout << "Enter the Amount to transfer : $";
+			cin.ignore();
+			cin >> amount;
+			cout << endl;
+
+			for (int i = 0; i < count; i++) {
+				if (accountNum1 == accountNum2) break;
+				if (obj[i].getAccountNumber() == accountNum1) {
+					first = i;
+				}
+				else if (obj[i].getAccountNumber() == accountNum2) {
+					second = i;
+				}
+			}
+		Transaction transfer(1111,amount, obj[first].getAccountNumber(), obj[first].getAccountBalance(), obj[second].getAccountNumber(), obj[second].getAccountBalance());
+		cout << "********************************Transaction Occuring*************************************\n" << endl;
+		bool transactionStatus = transfer.transferAmount();//Transaction is occuring
+		if (transactionStatus) {
+
+			obj[first].setAccountBalance(transfer.newBalance1()); //first account balance is updated
+			obj[second].setAccountBalance(transfer.newBalance2());//second account balance is updated
+
+			cout << transfer;
+
+			cout << "********************************** Transaction Successful **********************************" << endl;
+			cout << "For the account number : " << obj[second].getAccountNumber() << " an amount of : $" << transfer.getAmount() << " has been transfered from the account number : " << obj[first].getAccountNumber() << endl;
+			
+		}
+		else {
+			cout << "The Transaction has failed " << endl;
+		}
+	}
+	system("pause");
+	return 0;
+}
+
+int checkAccountNumber() {
+	int accNum;
+	cin >> accNum;
+	if (accNum >= 1000 && accNum <= 9999) {
+		return accNum;
+	}
+	else {
+		throw invalid_argument("The Account Number is invalid");
+	}
+
+}
